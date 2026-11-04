@@ -50,3 +50,15 @@ lapskey trigger --force
 systemctl --user restart lapskey
 systemctl --user restart lapskey-tray
 ```
+
+## build-release.sh
+
+Собирает архивы релиза из текущего `git HEAD`:
+
+```bash
+./scripts/build-release.sh 0.1.0
+```
+
+Создаёт `dist/lapskey-0.1.0.tar.gz`, стабильный `dist/lapskey.tar.gz` и
+`dist/SHA256SUMS`. Обычно запускается автоматически из
+`.github/workflows/release.yml` при пуше тега `v*`.

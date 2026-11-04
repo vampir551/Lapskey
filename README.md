@@ -14,13 +14,26 @@ nfr      -> так
 
 ## Быстрый старт
 
+### Из релиза
+
+```bash
+curl -L -O https://github.com/vampir551/Lapskey/releases/latest/download/lapskey.tar.gz
+curl -L -O https://github.com/vampir551/Lapskey/releases/latest/download/SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS
+tar xf lapskey.tar.gz
+cd lapskey-*
+./scripts/install.sh
+```
+
+### Из git
+
 ```bash
 git clone https://github.com/vampir551/Lapskey.git
 cd Lapskey
 ./scripts/install.sh
 ```
 
-Или, если проект уже скачан в произвольный каталог:
+Или из произвольного каталога:
 
 ```bash
 cd /путь/к/LapSKey
