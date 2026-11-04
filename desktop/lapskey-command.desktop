@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=LapSKey
+Exec=/usr/bin/env lapskey trigger
+Icon=input-keyboard
+NoDisplay=true
+StartupNotify=false
+X-KDE-GlobalAccel-CommandShortcut=true

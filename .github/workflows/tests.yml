@@ -1,0 +1,33 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install python-evdev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3-dev
+          python -m pip install --upgrade pip
+          python -m pip install evdev
+
+      - name: Compile
+        run: python -m compileall -q lapskey tests
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v

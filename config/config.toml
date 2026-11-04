@@ -1,0 +1,72 @@
+# LapSKey for KDE Plasma / Wayland
+# https://github.com/ (see README.md)
+
+[general]
+log_level = "info"          # debug | info | warning | error
+notify = true               # show desktop notifications
+notify_errors = true
+
+[hotkey]
+# kde   - recommended: bind `lapskey trigger` in KDE System Settings
+# evdev - read the hotkey directly from /dev/input (the key also reaches
+#         the focused application, use a combination you do not need there)
+mode = "kde"
+evdev_key = "KEY_F12"
+evdev_ctrl = false
+evdev_shift = false
+evdev_alt = false
+
+[input]
+# auto      - PRIMARY selection -> evdev buffer -> clipboard probe
+# buffer    - only the keystroke buffer (no clipboard access)
+# clipboard - only select-previous-word + copy
+acquisition = "auto"
+
+copy_combo = "ctrl+insert"      # safe copy shortcut (no SIGINT in terminals)
+select_word_combo = "ctrl+shift+left"  # select the word before the cursor
+primary_selection = true        # read selected text from the PRIMARY selection
+copy_probe = true               # fall back to copy if PRIMARY is unavailable
+restore_clipboard = true
+clipboard_timeout_ms = 350
+selection_max_chars = 200       # refuse to auto-convert huge selections
+
+[fix]
+mode = "smart"                  # smart | always
+score_threshold = 1.5           # higher = more conservative
+double_press_ms = 0             # 0 = off; >0 enables "press twice to force"
+switch_layout = true            # switch KDE layout after a fix
+insert = "auto"                 # auto | keys | clipboard
+paste_combo = "ctrl+v"          # only used by the clipboard fallback
+inter_key_delay_ms = 2
+layout_switch_timeout_ms = 500
+modifier_release_timeout_ms = 3000
+
+[auto]
+# Automatic conversion of the last word after Space.  Off by default because
+# false positives are much more annoying than a missed fix.
+enabled = false
+min_word_length = 3
+score_threshold = 5.0
+delay_ms = 140
+
+[keyboard]
+devices = []                    # empty = every readable keyboard
+exclude = ["lapskey", "ydotool"]
+rescan_seconds = 10
+
+[layout]
+backend = "kde"                 # KDE Plasma (org.kde.keyboard DBus service)
+
+[mapping]
+# Дополнительные/переопределяющие пары символов: [английский, русский].
+# Стандартная раскладка ЙЦУКЕН уже встроена.
+pairs = []
+
+[dictionaries]
+files = []                      # extra word lists, one word per line
+auto_detect = true              # /usr/share/hunspell and friends
+
+[paths]
+wl_paste = "wl-paste"
+wl_copy = "wl-copy"
+ydotool = "ydotool"

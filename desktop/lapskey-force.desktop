@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=LapSKey Force
+GenericName=Force keyboard layout fix
+Comment=Force the last word/selection into the other keyboard layout
+Exec=/usr/bin/env lapskey-force
+Icon=input-keyboard
+Terminal=false
+StartupNotify=false
+NoDisplay=true
+X-KDE-GlobalAccel-CommandShortcut=true

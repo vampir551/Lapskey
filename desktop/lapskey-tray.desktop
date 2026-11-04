@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=LapSKey (трей)
+GenericName=Keyboard layout fixer
+Comment=Значок LapSKey в системном трее и настройки
+Exec=/usr/bin/env lapskey tray
+Icon=input-keyboard
+Terminal=false
+StartupNotify=false
+Categories=Utility;
+Keywords=keyboard;layout;lapskey;раскладка;

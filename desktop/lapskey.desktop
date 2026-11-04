@@ -1,0 +1,20 @@
+[Desktop Entry]
+Type=Application
+Name=LapSKey
+GenericName=Keyboard layout fixer
+Comment=Fix the last word typed in the wrong keyboard layout
+Exec=/usr/bin/env lapskey trigger
+Icon=input-keyboard
+Terminal=false
+StartupNotify=false
+Categories=Utility;
+Keywords=keyboard;layout;layout switch;lapskey;раскладка;
+Actions=Trigger;Force;
+
+[Desktop Action Trigger]
+Name=Fix last word
+Exec=/usr/bin/env lapskey trigger
+
+[Desktop Action Force]
+Name=Fix last word (force)
+Exec=/usr/bin/env lapskey trigger --force

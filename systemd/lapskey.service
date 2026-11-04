@@ -1,0 +1,19 @@
+[Unit]
+Description=LapSKey — keyboard layout fixer for KDE / Wayland
+Documentation=file://%h/.local/share/lapskey/app/README.md
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/lapskey run
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=5
+# The daemon only needs its own runtime socket, /dev/input (read) and
+# /dev/uinput (write); none of these conflict with NoNewPrivileges.
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=graphical-session.target
