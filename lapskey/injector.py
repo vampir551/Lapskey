@@ -73,6 +73,7 @@ NAMED_KEYS.update({str(d): KEY[str(d)] for d in range(10)})
 
 SHIFT = KEY["LEFTSHIFT"]
 BACKSPACE = KEY["BACKSPACE"]
+VIRTUAL_DEVICE_NAME = "LapSKey virtual keyboard"
 
 
 def parse_combo(combo: str) -> list[int]:
@@ -103,9 +104,10 @@ class UinputBackend:
         codes = sorted(set(KEY.values()) | {SHIFT, BACKSPACE})
         self.ui = UInput(
             events={ecodes.EV_KEY: codes},
-            name="LapSKey virtual keyboard",
+            name=VIRTUAL_DEVICE_NAME,
             version=1,
         )
+        self.device_name = VIRTUAL_DEVICE_NAME
         log.info("injector: uinput device %s", self.ui.device.path)
 
     def _write(self, code: int, value: int) -> None:
@@ -128,11 +130,13 @@ class UinputBackend:
         *mods, key = codes
         for code in mods:
             self._write(code, 1)
-        time.sleep(0.002)
-        self._tap(key)
-        for code in reversed(mods):
-            self._write(code, 0)
-        time.sleep(0.002)
+        try:
+            time.sleep(0.002)
+            self._tap(key)
+        finally:
+            for code in reversed(mods):
+                self._write(code, 0)
+            time.sleep(0.002)
 
     def tap_sync(self, code: int) -> None:
         self._tap(code)
@@ -147,30 +151,34 @@ class UinputBackend:
         neutral: Callable[[], bool] | None = None,
     ) -> None:
         shift_down = False
-        for stroke in keys:
-            if neutral is not None:
-                # If the user grabs Shift/Ctrl while we are retyping, pause:
-                # otherwise the compositor applies that modifier to the rest of
-                # the injected text ("привет, кАК ДЕЛА" out of nowhere).
-                deadline = time.monotonic() + 2.0
-                while not neutral():
-                    if time.monotonic() > deadline:
-                        raise LapsKeyError(
-                            "модификатор зажат во время ввода — ввод остановлен"
-                        )
-                    time.sleep(0.01)
-            if stroke.shift and not shift_down:
-                self._write(SHIFT, 1)
-                shift_down = True
-                time.sleep(0.002)
-            elif not stroke.shift and shift_down:
+        try:
+            for stroke in keys:
+                if neutral is not None:
+                    # If the user grabs Shift/Ctrl while we are retyping, pause:
+                    # otherwise the compositor applies that modifier to the rest
+                    # of the injected text ("привет, кАК ДЕЛА" out of nowhere).
+                    deadline = time.monotonic() + 2.0
+                    while not neutral():
+                        if time.monotonic() > deadline:
+                            raise LapsKeyError(
+                                "модификатор зажат во время ввода — ввод остановлен"
+                            )
+                        time.sleep(0.01)
+                if stroke.shift and not shift_down:
+                    self._write(SHIFT, 1)
+                    shift_down = True
+                    time.sleep(0.002)
+                elif not stroke.shift and shift_down:
+                    self._write(SHIFT, 0)
+                    shift_down = False
+                    time.sleep(0.001)
+                self._tap(stroke.code)
+        finally:
+            # Never leave our synthetic Shift down, even if the neutral check
+            # aborted the retype or the device write failed midway.
+            if shift_down:
                 self._write(SHIFT, 0)
-                shift_down = False
                 time.sleep(0.001)
-            self._tap(stroke.code)
-        if shift_down:
-            self._write(SHIFT, 0)
-            time.sleep(0.001)
 
     def close(self) -> None:
         try:
@@ -267,6 +275,13 @@ class Injector:
     def __init__(self, backend: UinputBackend | YdotoolBackend) -> None:
         self.backend = backend
         self.name = backend.name
+
+    @property
+    def exclude_names(self) -> list[str]:
+        """Device names the evdev monitor must never read back."""
+        if isinstance(self.backend, UinputBackend):
+            return ["lapskey", VIRTUAL_DEVICE_NAME.lower()]
+        return []
 
     async def tap(self, code: int) -> None:
         if isinstance(self.backend, UinputBackend):

@@ -1,8 +1,9 @@
 import unittest
 from types import SimpleNamespace
 
-from lapskey.injector import UinputBackend, parse_combo
-from lapskey.mapping import KEY
+from lapskey.injector import Injector, UinputBackend, parse_combo
+from lapskey.mapping import KEY, KeyStroke
+from lapskey.util import LapsKeyError
 
 
 class FakeUInput:
@@ -44,12 +45,41 @@ class InjectorTests(unittest.TestCase):
         self.assertEqual(parse_combo("ctrl+insert"), [KEY["LEFTCTRL"], KEY["INSERT"]])
 
     def test_parse_combo_errors(self):
-        from lapskey.util import LapsKeyError
-
         with self.assertRaises(LapsKeyError):
             parse_combo("ctrl+")
         with self.assertRaises(LapsKeyError):
             parse_combo("hyper+a")
+
+    def test_shift_is_released_when_typing_aborts(self):
+        backend = UinputBackend.__new__(UinputBackend)
+        backend.ui = FakeUInput()
+        backend._ecodes = SimpleNamespace(EV_KEY=1)
+        backend.delay = 0
+        calls = {"n": 0}
+
+        def neutral():
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return True
+            raise LapsKeyError("modifier pressed")
+
+        with self.assertRaises(LapsKeyError):
+            backend.type_keys_sync(
+                [KeyStroke(KEY["A"], True), KeyStroke(KEY["B"], False)],
+                neutral,
+            )
+
+        self.assertEqual(
+            backend.ui.calls[-2], ("write", 1, KEY["LEFTSHIFT"], 0)
+        )
+
+    def test_injector_excludes_its_own_device(self):
+        backend = UinputBackend.__new__(UinputBackend)
+        injector = Injector.__new__(Injector)
+        injector.backend = backend
+        names = injector.exclude_names
+        self.assertIn("lapskey", names)
+        self.assertIn("lapskey virtual keyboard", names)
 
 
 if __name__ == "__main__":

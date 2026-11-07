@@ -93,10 +93,14 @@ class Daemon:
             if hotkey_code is None:
                 log.error("unknown evdev_key=%r", self.cfg.hotkey.evdev_key)
 
+        monitor_exclude = list(self.cfg.keyboard.exclude)
+        if self.injector is not None:
+            monitor_exclude.extend(self.injector.exclude_names)
+
         self.monitor = InputMonitor(
             asyncio.get_running_loop(),
             devices=self.cfg.keyboard.devices,
-            exclude=self.cfg.keyboard.exclude,
+            exclude=monitor_exclude,
             rescan_seconds=self.cfg.keyboard.rescan_seconds,
             hotkey_code=hotkey_code,
             hotkey_ctrl=self.cfg.hotkey.evdev_ctrl,
